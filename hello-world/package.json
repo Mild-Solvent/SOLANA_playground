@@ -1,14 +1,6 @@
 {
-  "name": "solana-contracts-workspace",
-  "version": "1.0.0",
-  "description": "A comprehensive Solana smart contracts workspace",
   "license": "ISC",
-  "type": "module",
   "scripts": {
-    "test": "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts",
-    "test:hello-world": "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/hello-world.ts",
-    "build": "anchor build",
-    "deploy": "anchor deploy",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
   },

@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hello World Smart Contract - Solana Devnet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .wallet-section {
+            text-align: center;
+        }
+
+        .wallet-status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .wallet-connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .wallet-disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #e74c3c);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .greeting-display {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .greeting-display h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .greeting-display p {
+            margin: 5px 0;
+        }
+
+        .account-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .account-address {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-connected {
+            background: #28a745;
+        }
+
+        .status-disconnected {
+            background: #dc3545;
+        }
+
+        .explorer-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .explorer-link:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .network-info {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .network-info h4 {
+            color: #004085;
+            margin-bottom: 10px;
+        }
+
+        .contract-info {
+            font-family: monospace;
+            font-size: 14px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .account-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Hello World Smart Contract</h1>
+            <p>Interactive interface for Solana devnet contract interactions</p>
+        </div>
+
+        <!-- Network Information -->
+        <div class="card">
+            <div class="network-info">
+                <h4>📡 Network Information</h4>
+                <div class="contract-info">
+                    <strong>Network:</strong> Solana Devnet<br>
+                    <strong>Program ID:</strong> Hj9Hb5XYVqZNcPwVswyT47rtpozHW6NdjoP3FubmYFDr<br>
+                    <strong>RPC Endpoint:</strong> https://api.devnet.solana.com
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Connection -->
+        <div class="card">
+            <div class="wallet-section">
+                <h2>🔐 Wallet Connection</h2>
+                <div id="walletStatus" class="wallet-status wallet-disconnected">
+                    <span class="status-indicator status-disconnected"></span>
+                    Phantom wallet not connected
+                </div>
+                <button id="connectWallet" class="btn">Connect Phantom Wallet</button>
+                <button id="disconnectWallet" class="btn btn-danger" style="display: none;">Disconnect Wallet</button>
+                <div id="walletInfo" style="display: none; margin-top: 15px;">
+                    <p><strong>Address:</strong> <span id="walletAddress" class="account-address"></span></p>
+                    <p><strong>Balance:</strong> <span id="walletBalance">0</span> SOL</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Initialize Greeting -->
+        <div class="card">
+            <h2>🚀 Initialize New Greeting Account</h2>
+            <p>Create a new greeting account with your initial message.</p>
+            <div class="form-group">
+                <label for="initMessage">Initial Greeting Message:</label>
+                <textarea id="initMessage" rows="3" placeholder="Enter your greeting message here..." maxlength="200"></textarea>
+                <small>Maximum 200 characters</small>
+            </div>
+            <button id="initializeBtn" class="btn btn-secondary" disabled>Initialize Greeting Account</button>
+            <div id="initResult" style="display: none; margin-top: 15px;"></div>
+        </div>
+
+        <!-- Manage Greeting Accounts -->
+        <div class="card">
+            <h2>📝 Manage Greeting Accounts</h2>
+            <div id="accountsList">
+                <p>No greeting accounts found. Initialize one above to get started!</p>
+            </div>
+            <button id="refreshAccounts" class="btn" disabled>Refresh Accounts</button>
+        </div>
+
+        <!-- Account Interaction -->
+        <div class="card" id="interactionCard" style="display: none;">
+            <h2>💬 Interact with Greeting Account</h2>
+            <div class="form-group">
+                <label for="selectedAccount">Selected Account:</label>
+                <select id="selectedAccount" class="form-control">
+                    <option value="">Select an account...</option>
+                </select>
+            </div>
+            
+            <div id="currentGreeting" class="greeting-display" style="display: none;">
+                <h3>Current Greeting:</h3>
+                <p><strong>Message:</strong> <span id="greetingMessage"></span></p>
+                <p><strong>Update Count:</strong> <span id="greetingCount"></span></p>
+            </div>
+
+            <div class="form-group">
+                <label for="updateMessage">New Message:</label>
+                <textarea id="updateMessage" rows="3" placeholder="Enter new greeting message..." maxlength="200"></textarea>
+            </div>
+            
+            <button id="updateBtn" class="btn btn-secondary" disabled>Update Greeting</button>
+            <button id="getGreetingBtn" class="btn" disabled>Get Current Greeting</button>
+            <div id="updateResult" style="display: none; margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script>
+        // Global variables
+        let wallet = null;
+        let connection = null;
+        let greetingAccounts = [];
+        
+        // Program ID and connection setup
+        const PROGRAM_ID = new solanaWeb3.PublicKey('Hj9Hb5XYVqZNcPwVswyT47rtpozHW6NdjoP3FubmYFDr');
+        const DEVNET_RPC = 'https://api.devnet.solana.com';
+        
+        // Initialize connection
+        connection = new solanaWeb3.Connection(DEVNET_RPC, 'confirmed');
+        
+        // DOM elements
+        const connectWalletBtn = document.getElementById('connectWallet');
+        const disconnectWalletBtn = document.getElementById('disconnectWallet');
+        const walletStatus = document.getElementById('walletStatus');
+        const walletInfo = document.getElementById('walletInfo');
+        const walletAddress = document.getElementById('walletAddress');
+        const walletBalance = document.getElementById('walletBalance');
+        const initializeBtn = document.getElementById('initializeBtn');
+        const refreshAccountsBtn = document.getElementById('refreshAccounts');
+        const interactionCard = document.getElementById('interactionCard');
+        const selectedAccountSelect = document.getElementById('selectedAccount');
+        const updateBtn = document.getElementById('updateBtn');
+        const getGreetingBtn = document.getElementById('getGreetingBtn');
+        
+        // Event listeners
+        connectWalletBtn.addEventListener('click', connectWallet);
+        disconnectWalletBtn.addEventListener('click', disconnectWallet);
+        initializeBtn.addEventListener('click', initializeGreeting);
+        refreshAccountsBtn.addEventListener('click', refreshAccounts);
+        updateBtn.addEventListener('click', updateGreeting);
+        getGreetingBtn.addEventListener('click', getCurrentGreeting);
+        selectedAccountSelect.addEventListener('change', onAccountSelect);
+        
+        // Wallet connection functions
+        async function connectWallet() {
+            try {
+                if (!window.solana || !window.solana.isPhantom) {
+                    alert('Phantom wallet not found! Please install Phantom wallet extension.');
+                    return;
+                }
+                
+                const response = await window.solana.connect();
+                wallet = window.solana;
+                
+                updateWalletUI(true, response.publicKey.toString());
+                await updateWalletBalance();
+                enableButtons();
+                
+                console.log('Connected to wallet:', response.publicKey.toString());
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                alert('Failed to connect wallet: ' + error.message);
+            }
+        }
+        
+        async function disconnectWallet() {
+            try {
+                if (wallet) {
+                    await wallet.disconnect();
+                }
+                wallet = null;
+                updateWalletUI(false);
+                disableButtons();
+                clearAccountsList();
+            } catch (error) {
+                console.error('Error disconnecting wallet:', error);
+            }
+        }
+        
+        function updateWalletUI(connected, address = '') {
+            if (connected) {
+                walletStatus.className = 'wallet-status wallet-connected';
+                walletStatus.innerHTML = '<span class="status-indicator status-connected"></span>Phantom wallet connected';
+                walletAddress.textContent = address;
+                walletInfo.style.display = 'block';
+                connectWalletBtn.style.display = 'none';
+                disconnectWalletBtn.style.display = 'inline-block';
+            } else {
+                walletStatus.className = 'wallet-status wallet-disconnected';
+                walletStatus.innerHTML = '<span class="status-indicator status-disconnected"></span>Phantom wallet not connected';
+                walletInfo.style.display = 'none';
+                connectWalletBtn.style.display = 'inline-block';
+                disconnectWalletBtn.style.display = 'none';
+            }
+        }
+        
+        async function updateWalletBalance() {
+            if (!wallet) return;
+            
+            try {
+                const balance = await connection.getBalance(wallet.publicKey);
+                walletBalance.textContent = (balance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4);
+            } catch (error) {
+                console.error('Error getting balance:', error);
+                walletBalance.textContent = 'Error';
+            }
+        }
+        
+        function enableButtons() {
+            initializeBtn.disabled = false;
+            refreshAccountsBtn.disabled = false;
+        }
+        
+        function disableButtons() {
+            initializeBtn.disabled = true;
+            refreshAccountsBtn.disabled = true;
+            updateBtn.disabled = true;
+            getGreetingBtn.disabled = true;
+        }
+        
+        // Initialize greeting account
+        async function initializeGreeting() {
+            if (!wallet) {
+                alert('Please connect your wallet first');
+                return;
+            }
+            
+            const message = document.getElementById('initMessage').value.trim();
+            if (!message) {
+                alert('Please enter a greeting message');
+                return;
+            }
+            
+            if (message.length > 200) {
+                alert('Message too long. Maximum 200 characters allowed.');
+                return;
+            }
+            
+            try {
+                initializeBtn.disabled = true;
+                initializeBtn.innerHTML = 'Initializing... <div class="loading"></div>';
+                
+                // Create a new keypair for the greeting account
+                const greetingAccount = solanaWeb3.Keypair.generate();
+                
+                // Create initialize instruction
+                const instruction = await createInitializeInstruction(
+                    greetingAccount.publicKey,
+                    wallet.publicKey,
+                    message
+                );
+                
+                // Create transaction
+                const transaction = new solanaWeb3.Transaction().add(instruction);
+                transaction.feePayer = wallet.publicKey;
+                transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+                
+                // Sign with greeting account keypair
+                transaction.partialSign(greetingAccount);
+                
+                // Send transaction for wallet signing
+                const signedTransaction = await wallet.signTransaction(transaction);
+                const signature = await connection.sendRawTransaction(signedTransaction.serialize());
+                
+                // Confirm transaction
+                await connection.confirmTransaction(signature, 'confirmed');
+                
+                // Show result
+                const resultDiv = document.getElementById('initResult');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <div class="greeting-display">
+                        <h3>✅ Greeting Account Created Successfully!</h3>
+                        <p><strong>Account Address:</strong> <span class="account-address">${greetingAccount.publicKey.toString()}</span></p>
+                        <p><strong>Transaction:</strong> <a href="https://explorer.solana.com/tx/${signature}?cluster=devnet" target="_blank" class="explorer-link">View on Explorer</a></p>
+                        <p><strong>Initial Message:</strong> ${message}</p>
+                    </div>
+                `;
+                
+                // Clear form and refresh accounts
+                document.getElementById('initMessage').value = '';
+                setTimeout(refreshAccounts, 2000); // Give time for account to be indexed
+                
+            } catch (error) {
+                console.error('Error initializing greeting:', error);
+                alert('Failed to initialize greeting account: ' + error.message);
+                
+                const resultDiv = document.getElementById('initResult');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<div style="color: red;"><strong>Error:</strong> ${error.message}</div>`;
+            } finally {
+                initializeBtn.disabled = false;
+                initializeBtn.innerHTML = 'Initialize Greeting Account';
+            }
+        }
+        
+        // Create initialize instruction
+        async function createInitializeInstruction(greetingAccountPubkey, userPubkey, message) {
+            // Instruction discriminator for initialize function
+            const discriminator = Buffer.from([175, 175, 109, 31, 13, 152, 155, 237]);
+            
+            // Serialize message
+            const messageBuffer = Buffer.from(message, 'utf8');
+            const messageLengthBuffer = Buffer.alloc(4);
+            messageLengthBuffer.writeUInt32LE(messageBuffer.length, 0);
+            
+            const data = Buffer.concat([discriminator, messageLengthBuffer, messageBuffer]);
+            
+            const keys = [
+                {
+                    pubkey: greetingAccountPubkey,
+                    isSigner: true,
+                    isWritable: true,
+                },
+                {
+                    pubkey: userPubkey,
+                    isSigner: true,
+                    isWritable: true,
+                },
+                {
+                    pubkey: solanaWeb3.SystemProgram.programId,
+                    isSigner: false,
+                    isWritable: false,
+                },
+            ];
+            
+            return new solanaWeb3.TransactionInstruction({
+                keys,
+                programId: PROGRAM_ID,
+                data,
+            });
+        }
+        
+        // Create update instruction
+        async function createUpdateInstruction(greetingAccountPubkey, message) {
+            // Instruction discriminator for update_greeting function
+            const discriminator = Buffer.from([92, 55, 69, 245, 121, 166, 1, 55]);
+            
+            // Serialize message
+            const messageBuffer = Buffer.from(message, 'utf8');
+            const messageLengthBuffer = Buffer.alloc(4);
+            messageLengthBuffer.writeUInt32LE(messageBuffer.length, 0);
+            
+            const data = Buffer.concat([discriminator, messageLengthBuffer, messageBuffer]);
+            
+            const keys = [
+                {
+                    pubkey: greetingAccountPubkey,
+                    isSigner: false,
+                    isWritable: true,
+                },
+            ];
+            
+            return new solanaWeb3.TransactionInstruction({
+                keys,
+                programId: PROGRAM_ID,
+                data,
+            });
+        }
+        
+        // Refresh accounts (simplified - in a real app you'd track created accounts)
+        async function refreshAccounts() {
+            // For this demo, we'll ask user to manually input account addresses
+            // In a production app, you'd track accounts in localStorage or a database
+            const accountsList = document.getElementById('accountsList');
+            accountsList.innerHTML = `
+                <p>To interact with greeting accounts, please enter the account address manually:</p>
+                <div class="form-group">
+                    <input type="text" id="manualAccountInput" placeholder="Enter greeting account address..." style="margin-bottom: 10px;">
+                    <button onclick="addManualAccount()" class="btn">Add Account</button>
+                </div>
+                <div id="manualAccountsList"></div>
+            `;
+            
+            showInteractionCard();
+        }
+        
+        // Add manual account
+        function addManualAccount() {
+            const input = document.getElementById('manualAccountInput');
+            const address = input.value.trim();
+            
+            if (!address) {
+                alert('Please enter an account address');
+                return;
+            }
+            
+            try {
+                const pubkey = new solanaWeb3.PublicKey(address);
+                greetingAccounts.push(address);
+                
+                // Add to dropdown
+                const option = document.createElement('option');
+                option.value = address;
+                option.textContent = address.substring(0, 8) + '...' + address.substring(address.length - 8);
+                selectedAccountSelect.appendChild(option);
+                
+                // Update manual accounts list
+                updateManualAccountsList();
+                
+                input.value = '';
+                enableInteractionButtons();
+                
+            } catch (error) {
+                alert('Invalid account address');
+            }
+        }
+        
+        function updateManualAccountsList() {
+            const list = document.getElementById('manualAccountsList');
+            if (greetingAccounts.length === 0) {
+                list.innerHTML = '<p>No accounts added yet.</p>';
+                return;
+            }
+            
+            list.innerHTML = greetingAccounts.map(address => `
+                <div class="account-item">
+                    <span class="account-address">${address}</span>
+                    <button onclick="removeAccount('${address}')" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">Remove</button>
+                </div>
+            `).join('');
+        }
+        
+        function removeAccount(address) {
+            greetingAccounts = greetingAccounts.filter(acc => acc !== address);
+            
+            // Remove from dropdown
+            const option = selectedAccountSelect.querySelector(`option[value="${address}"]`);
+            if (option) option.remove();
+            
+            updateManualAccountsList();
+            
+            if (greetingAccounts.length === 0) {
+                disableInteractionButtons();
+            }
+        }
+        
+        function showInteractionCard() {
+            interactionCard.style.display = 'block';
+        }
+        
+        function enableInteractionButtons() {
+            updateBtn.disabled = false;
+            getGreetingBtn.disabled = false;
+        }
+        
+        function disableInteractionButtons() {
+            updateBtn.disabled = true;
+            getGreetingBtn.disabled = true;
+        }
+        
+        function clearAccountsList() {
+            greetingAccounts = [];
+            selectedAccountSelect.innerHTML = '<option value="">Select an account...</option>';
+            document.getElementById('accountsList').innerHTML = '<p>No greeting accounts found. Initialize one above to get started!</p>';
+            interactionCard.style.display = 'none';
+        }
+        
+        // Account selection
+        function onAccountSelect() {
+            const selectedAddress = selectedAccountSelect.value;
+            if (selectedAddress) {
+                getCurrentGreeting();
+            }
+        }
+        
+        // Get current greeting
+        async function getCurrentGreeting() {
+            const selectedAddress = selectedAccountSelect.value;
+            if (!selectedAddress) {
+                alert('Please select an account first');
+                return;
+            }
+            
+            try {
+                getGreetingBtn.disabled = true;
+                getGreetingBtn.innerHTML = 'Loading... <div class="loading"></div>';
+                
+                const accountPubkey = new solanaWeb3.PublicKey(selectedAddress);
+                const accountInfo = await connection.getAccountInfo(accountPubkey);
+                
+                if (!accountInfo) {
+                    throw new Error('Account not found');
+                }
+                
+                // Parse account data (simplified parsing)
+                const data = accountInfo.data;
+                
+                // Skip discriminator (8 bytes)
+                let offset = 8;
+                
+                // Read message length (4 bytes)
+                const messageLength = data.readUInt32LE(offset);
+                offset += 4;
+                
+                // Read message
+                const message = data.slice(offset, offset + messageLength).toString('utf8');
+                offset += messageLength;
+                
+                // Align to 8-byte boundary for u64
+                while (offset % 8 !== 0) offset++;
+                
+                // Read count (8 bytes)
+                const count = data.readBigUInt64LE(offset);
+                
+                // Display greeting
+                const greetingDiv = document.getElementById('currentGreeting');
+                document.getElementById('greetingMessage').textContent = message;
+                document.getElementById('greetingCount').textContent = count.toString();
+                greetingDiv.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error getting greeting:', error);
+                alert('Failed to get greeting: ' + error.message);
+            } finally {
+                getGreetingBtn.disabled = false;
+                getGreetingBtn.innerHTML = 'Get Current Greeting';
+            }
+        }
+        
+        // Update greeting
+        async function updateGreeting() {
+            if (!wallet) {
+                alert('Please connect your wallet first');
+                return;
+            }
+            
+            const selectedAddress = selectedAccountSelect.value;
+            if (!selectedAddress) {
+                alert('Please select an account first');
+                return;
+            }
+            
+            const message = document.getElementById('updateMessage').value.trim();
+            if (!message) {
+                alert('Please enter a new message');
+                return;
+            }
+            
+            if (message.length > 200) {
+                alert('Message too long. Maximum 200 characters allowed.');
+                return;
+            }
+            
+            try {
+                updateBtn.disabled = true;
+                updateBtn.innerHTML = 'Updating... <div class="loading"></div>';
+                
+                const accountPubkey = new solanaWeb3.PublicKey(selectedAddress);
+                
+                // Create update instruction
+                const instruction = await createUpdateInstruction(accountPubkey, message);
+                
+                // Create transaction
+                const transaction = new solanaWeb3.Transaction().add(instruction);
+                transaction.feePayer = wallet.publicKey;
+                transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+                
+                // Send transaction
+                const signedTransaction = await wallet.signTransaction(transaction);
+                const signature = await connection.sendRawTransaction(signedTransaction.serialize());
+                
+                // Confirm transaction
+                await connection.confirmTransaction(signature, 'confirmed');
+                
+                // Show result
+                const resultDiv = document.getElementById('updateResult');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <div class="greeting-display">
+                        <h3>✅ Greeting Updated Successfully!</h3>
+                        <p><strong>Transaction:</strong> <a href="https://explorer.solana.com/tx/${signature}?cluster=devnet" target="_blank" class="explorer-link">View on Explorer</a></p>
+                        <p><strong>New Message:</strong> ${message}</p>
+                    </div>
+                `;
+                
+                // Clear form and refresh greeting
+                document.getElementById('updateMessage').value = '';
+                setTimeout(getCurrentGreeting, 2000);
+                
+            } catch (error) {
+                console.error('Error updating greeting:', error);
+                alert('Failed to update greeting: ' + error.message);
+                
+                const resultDiv = document.getElementById('updateResult');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<div style="color: red;"><strong>Error:</strong> ${error.message}</div>`;
+            } finally {
+                updateBtn.disabled = false;
+                updateBtn.innerHTML = 'Update Greeting';
+            }
+        }
+        
+        // Check if Phantom is already connected on page load
+        window.addEventListener('load', async () => {
+            if (window.solana && window.solana.isPhantom) {
+                try {
+                    const response = await window.solana.connect({ onlyIfTrusted: true });
+                    if (response.publicKey) {
+                        wallet = window.solana;
+                        updateWalletUI(true, response.publicKey.toString());
+                        await updateWalletBalance();
+                        enableButtons();
+                    }
+                } catch (error) {
+                    // User hasn't given permission yet
+                    console.log('Wallet not auto-connected');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

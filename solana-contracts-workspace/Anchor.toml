@@ -9,11 +9,15 @@ skip-lint = false
 hello-world = "Hj9Hb5XYVqZNcPwVswyT47rtpozHW6NdjoP3FubmYFDr"
 solana_contracts_workspace = "Fgwuu9texvCmbq7WT7DcujyyW8HsRytfVnSEUmeeQKoM"
 
+[programs.devnet]
+hello-world = "Hj9Hb5XYVqZNcPwVswyT47rtpozHW6NdjoP3FubmYFDr"
+solana_contracts_workspace = "Fgwuu9texvCmbq7WT7DcujyyW8HsRytfVnSEUmeeQKoM"
+
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
